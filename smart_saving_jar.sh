@@ -66,26 +66,41 @@ function login() {
     echo "Login successful. Welcome, $USERNAME!"
     return 0
 }
+#Function to create and save a new financial goal
 function enter_new_goal() {
+# the user will enter the name of the goal
 read -p "Enter goal name :" goal
+# the user will enter the target amount in saudi riyals
 read -p "Enter target amount(SAR)" amount
+# the user will adjust the importance level (1 to 5) of the target
 read -p "Enter importance (where 1 is very high and 5 is low):" importance
+#save a goal data to a format amount;save;date;importance
+#for a new goal,saved=0, and date is todays date
 echo "$amount;0;$(date+%F);$importance"> "$GOALS_DIR/${USERNAME}_$goal.txt"
+#confirmation  messages
 echo "GOAL[$goal] with target $amount SAR created"
 }
+#function to delete an existing goal
 function delete_goal() {
+#display a list of current goals
 echo "Your current goals:"
 for file in $GOALS_DIR/${USERNAME}_*.txt ; do
+#extract the goal name from  the file name
 goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
-IFS=';' read -r GOAL_AMOUNT
-SAVED_AMOUNT_IMPORTANCE < "$file"
+#read the goal data from the file : amount;saved;date;importance
+IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT _IMPORTANCE < "$file"
+#determine the goal status based on saved amount
 status = "Not Finished"
 ["$SAVED_AMOUNT" -ge "$GOAL_AMOUNT"] && status="Finished"
+# print the goal name with its status
 echo "-$goal [$status]"
 done
+# Ask the user which goal the wanna delete
 read -p "Enter the goal name to delete:" goal
+#delete the goal file and its corresponding log file
 rm -f "$GOALS_DIR/${USERNAME}_$goal.txt"
 "$LOGS_DIR/${USERNAME}_$goal.log"
+#confirmation message
 echo "Goal [$goal] deleted"
 }
 
