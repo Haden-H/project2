@@ -104,3 +104,63 @@ rm -f "$GOALS_DIR/${USERNAME}_$goal.txt"
 echo "Goal [$goal] deleted"
 }
 
+# Function to add a new saving amount to an existing goal
+function add_saving_to_goal {
+echo "Your current goals:"
+
+# List all goals for the current user
+ls "$GOALS_DIR" | grep "^${USERNAME}_" | sed "s/^${USERNAME}_//;s/.txt$//"
+read -p "Which goal do you want to update? " goal
+goal_file="$GOALS_DIR/${USERNAME}_${goal}.txt"
+
+# Check if goal file exists
+if [ ! -f "$goal_file" ]; then
+   echo "Goal not found."
+   return
+fi
+
+# Read current goal data from file
+IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$goal_file"
+
+# Ask user for today's saved amount
+read -p "Enter amount saved today: " add
+
+# Update saved amount and last update date
+SAVED_AMOUNT=$((SAVED_AMOUNT + add))
+LAST_DATE=$(date +%F)
+
+# Save updated goal info back to the file
+echo "$GOAL_AMOUNT;$SAVED_AMOUNT;$LAST_DATE;$IMPORTANCE" > "$goal_file"
+
+# Calculate remaining amount
+remaining=$((GOAL_AMOUNT - SAVED_AMOUNT))
+# Display savings summary
+echo "You saved $SAVED_AMOUNT SAR. Remaining: $remaining SAR."
+
+# Append log entry
+echo "$(date +%F), $add" >> "$LOGS_DIR/${USERNAME}_${goal}.log"
+
+# Notify user of progress
+if [ $remaining -le 0 ]; then
+   echo "You have reached your goal [$goal]!"
+    elif [ $remaining -le $((GOAL_AMOUNT / 10)) ]; then
+    echo "You're very close to your goal [$goal]!"
+    fi
+}
+
+# Function to check if user hasn't saved for any goal in the last 3 days
+function check_inactivity_alerts {
+for file in "$GOALS_DIR/${USERNAME}"_*.txt; do
+goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
+# Extract the last date from the goal file
+IFS=';' read -r _ _ last_date _ < "$file"
+
+# Calculate number of days since last update
+days_since=$(( ( $(date +%s) - $(date -d "$last_date" +%s) ) / 86400 ))
+
+if [ $days_since -ge 3 ]; then
+     echo "Reminder: You haven't saved for goal [$goal] in $days_since days."
+fi
+done
+}
+
