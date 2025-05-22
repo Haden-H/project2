@@ -66,3 +66,26 @@ function login() {
     echo "Login successful. Welcome, $USERNAME!"
     return 0
 }
+function enter_new_goal() {
+read -p "Enter goal name :" goal
+read -p "Enter target amount(SAR)" amount
+read -p "Enter importance (where 1 is very high and 5 is low):" importance
+echo "$amount;0;$(date+%F);$importance"> "$GOALS_DIR/${USERNAME}_$goal.txt"
+echo "GOAL[$goal] with target $amount SAR created"
+}
+function delete_goal() {
+echo "Your current goals:"
+for file in $GOALS_DIR/${USERNAME}_*.txt ; do
+goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
+IFS=';' read -r GOAL_AMOUNT
+SAVED_AMOUNT_IMPORTANCE < "$file"
+status = "Not Finished"
+["$SAVED_AMOUNT" -ge "$GOAL_AMOUNT"] && status="Finished"
+echo "-$goal [$status]"
+done
+read -p "Enter the goal name to delete:" goal
+rm -f "$GOALS_DIR/${USERNAME}_$goal.txt"
+"$LOGS_DIR/${USERNAME}_$goal.log"
+echo "Goal [$goal] deleted"
+}
+
