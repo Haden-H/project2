@@ -163,4 +163,42 @@ if [ $days_since -ge 3 ]; then
 fi
 done
 }
-
+#this function ask the user to choose a period(week/month/year)
+# and calculate how much saved during that period
+function total_savings_in_period() {
+read -p "Enter period (week/month/year): " period
+# determine the start date depending on the chosen period
+case $period in
+week) since=$(date -d "-7 days" +%F) ;;
+month) since=$(date -d "-30 days" +%F) ;;
+year) since=$(date -d "-365 days" +%F) ;;
+*) echo "Invalid period" ; return ;;
+esac
+total=0
+# loop over all (log) fiels for this user
+for file in $LOGS_DIR/${USERNAME}_*.log; do
+while IFS=' , ' read -r date amount; do
+# if the date is after the  start date then add the amount to total
+if [[ "$date" > "$since" ]]; then
+total=$((total + amount))
+fi
+done < "$file"
+done
+echo "Total saved in the last $period: $total SAR"
+ }
+# this function help the user to creat a saving plane
+# by calculating how much to save monthly to reach a goal
+function suggest_saving_plane() {
+read -p "Enter your monthly income (SAR): " incom
+read -p "Enter your saving percentage (for example: 20 for 20%): " percent
+read -p "Enter the goal amount: " goal_amount
+monthly_saving=$((incom * percent / 100))
+# check if the result is 0 (invalid input)
+if [ $monthly_saving -eq 0 ]; then
+echo "The calculated saving per month is 0. please adjust your input."
+return
+fi
+# calculate how many months it would take to reach the goal
+month=$((goal_amount / monthly_saving))
+echo "Suggested plan: Save $monthly_saving SAR/month to reach your goal of $goal_amount SAR in approximately $months months."
+ }
