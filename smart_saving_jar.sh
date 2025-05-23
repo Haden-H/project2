@@ -214,9 +214,13 @@ done
 #this function ask the user to choose a period(week/month/year)
 # and calculate how much saved during that period
 function total_savings_in_period() {
-read -p "Enter period (week/month/year): " period
+echo "Select period: "
+echo"10 Week"
+echo "2) Month"
+echo "3) Year"
+read -p "Your choice: " choice
 # determine the start date depending on the chosen period
-case $period in
+case $choice in
 week) since=$(date -d "-7 days" +%F) ;;
 month) since=$(date -d "-30 days" +%F) ;;
 year) since=$(date -d "-365 days" +%F) ;;
@@ -236,7 +240,7 @@ echo "Total saved in the last $period: $total SAR"
  }
 # this function help the user to creat a saving plane
 # by calculating how much to save monthly to reach a goal
-function suggest_saving_plane() {
+function suggest_saving_plan() {
 read -p "Enter your monthly income (SAR): " incom
 read -p "Enter your saving percentage (for example: 20 for 20%): " percent
 read -p "Enter the goal amount: " goal_amount
