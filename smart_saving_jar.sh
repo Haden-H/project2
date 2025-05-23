@@ -215,10 +215,10 @@ done
 # and calculate how much saved during that period
 function total_savings_in_period() {
 echo "Select period: "
-echo "1) Week"
-echo "2) Month"
-echo "3) Year"
-read -p "Your choice: " choice
+echo "1- Week"
+echo "2- Month"
+echo "3- Year"
+read -p "Please enter your period in words only, Your choice: " choice
 # determine the start date depending on the chosen period
 case $choice in
 week) since=$(date -d "-7 days" +%F) ;;
