@@ -221,34 +221,6 @@ echo "Suggested plan: Save $monthly_saving SAR/month to reach your goal of $goal
 # Finally: Main Menu and Execution
 # ==============================================================================
 
-
-
-# System login
-clear
-echo "Welcome to Smart Saving Jar System"
-
-#  Display login or account creation options to the user
-echo "1) Login"
-echo "2) Create Account"
-
-# Read the user's choice (1 or 2)
-read -p "Choose: " choice
-
-#  Execute the appropriate action based on user input
-case $choice in
-    1) 
-        # If 1 is selected → login and then show the main menu
-        login && main_menu
-        ;;
-    2)
-        # If 2 is selected → create a new account and then show the main menu
-        create_account && main_menu
-        ;;
-    *)
-        # If input is invalid → display exit message
-        echo "Invalid choice. Exiting..."
-        ;;
-esac
 # Declares the main menu
 function main_menu() {
 #starts an infinite loop the menu will keep showing untill the user chooses exit
@@ -290,3 +262,29 @@ esac
 done 
 }
 
+# System login
+clear
+echo "Welcome to Smart Saving Jar System"
+
+#  Display login or account creation options to the user
+echo "1) Login"
+echo "2) Create Account"
+
+# Read the user's choice (1 or 2)
+read -p "Choose: " choice
+
+#  Execute the appropriate action based on user input
+case $choice in
+    1) 
+        # If 1 is selected → login and then show the main menu
+        login && main_menu
+        ;;
+    2)
+        # If 2 is selected → create a new account and then show the main menu
+        create_account && main_menu
+        ;;
+    *)
+        # If input is invalid → display exit message
+        echo "Invalid choice. Exiting..." 
+        ;;
+esac
