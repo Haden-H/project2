@@ -17,7 +17,7 @@ function create_account() {
     # Prompt the user to choose a username
     read -p "Choose a username: " username
     userfile="$USERS_DIR/$username.user"
-
+    
     # Check if the username already exists
     if [ -f "$userfile" ]; then
         echo "Account already exists. Try logging in."
@@ -25,43 +25,24 @@ function create_account() {
     fi
 
     # Prompt the user to set a password
-    read -p "Set a password (at most 8 characters, include letters and numbers): " pass
-
-    # Check password length
-    if [ ${#pass} -gt 8 ]; then
-        echo "Password must be no more than 8 characters, and contain at least one letter and one number."
-        return 1
-    fi
-
-    # Check for at least one letter
-    if ! [[ "$pass" =~ [A-Za-z] ]]; then
-        echo "Password must contain at least one letter."
-        return 1
-    fi
-
-    # Check for at least one number
-    if ! [[ "$pass" =~ [0-9] ]]; then
-        echo "Password must contain at least one number."
-        return 1
-    fi
+    read -p "Set a password: " pass
 
     # Save the password into the user file
     echo "$pass" > "$userfile"
 
     echo "Account created successfully!"
-
+    
     # Store the username in a variable for session use
     USERNAME="$username"
-    return 0
-}
+    return 0}
 
-# Function to log in an existing user
+# Function to log in with an existing account
 function login() {
     # Prompt the user to enter their username
     read -p "Enter your username: " username
     userfile="$USERS_DIR/$username.user"
 
-    # Check if the account exists
+    # Check if the user file exists
     if [ ! -f "$userfile" ]; then
         echo "Account does not exist. Please create one."
         return 1
@@ -69,33 +50,17 @@ function login() {
 
     # Prompt the user to enter their password
     read -p "Enter your password: " pass
+
+    # Read the saved password from the file
     saved_pass=$(cat "$userfile")
 
-    # Check if the password matches the saved one
+    # Compare entered password with saved password
     if [ "$pass" != "$saved_pass" ]; then
         echo "Incorrect password."
         return 1
     fi
 
-    # Check password length
-    if [ ${#pass} -gt 8 ]; then
-        echo "Password must be no more than 8 characters, and contain at least one letter and one number."
-        return 1
-    fi
-
-    # Check for at least one letter
-    if ! [[ "$pass" =~ [A-Za-z] ]]; then
-        echo "Password must contain at least one letter."
-        return 1
-    fi
-
-    # Check for at least one number
-    if ! [[ "$pass" =~ [0-9] ]]; then
-        echo "Password must contain at least one number."
-        return 1
-    fi
-
-    # If all checks pass, log the user in
+    # If password is correct, set the session username
     USERNAME="$username"
     echo "Login successful. Welcome, $USERNAME!"
     return 0
