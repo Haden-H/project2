@@ -249,3 +249,19 @@ case $choice in
         echo "Invalid choice. Exiting..."
         ;;
 esac
+# Declares the main menu
+function main_menu() {
+#starts an infinite loop the menu will keep showing untill the user chooses exit
+while true; do
+#calls a function (checks if the user has been inactive for a while and shows an alert
+  check_inactivity_alerts
+# echo statements to display the menu to the user
+  echo "\n --- Main Menu ---"
+  echo "1) Enter new saving goal"
+  echo "2) Add saving to existing goal"
+  echo "3) View total saving in a period"
+  echo "4) Delete a goal"
+  echo "5) Suggest saving a plan"
+  echo "6) Exit"
+#prompts the user to choose one of the menu options storing their input in the variable opt
+read -p "Choose an option" opt
