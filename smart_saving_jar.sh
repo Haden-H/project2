@@ -215,7 +215,7 @@ done
 # and calculate how much saved during that period
 function total_savings_in_period() {
 echo "Select period: "
-echo"10 Week"
+echo "1) Week"
 echo "2) Month"
 echo "3) Year"
 read -p "Your choice: " choice
