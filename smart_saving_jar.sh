@@ -265,3 +265,28 @@ while true; do
   echo "6) Exit"
 #prompts the user to choose one of the menu options storing their input in the variable opt
 read -p "Choose an option" opt
+case $opt in
+    # If user selects option 1: call function to enter a new goal
+    1) enter_new_goal ;;
+
+    # If user selects option 2: call function to add saving to an existing goal
+    2) add_saving_to_goal ;;
+
+    # If user selects option 3: call function to view total savings in a specific period
+    3) total_savings_in_period ;;
+
+    # If user selects option 4: call function to delete a goal
+    4) delete_goal ;;
+
+    # If user selects option 5: suggest a saving plan or show all goals with status
+    5) suggest_saving_plan ;;
+
+    # If user selects option 6: exit the program with a farewell message
+    6) echo "Thank you for using Smart Saving Jar. Keep saving!" ; break ;;
+
+    # If the input does not match any valid option
+    *) echo "Invalid option." ;;
+esac
+done 
+}
+
