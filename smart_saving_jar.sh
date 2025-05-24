@@ -21,8 +21,8 @@ function create_account() {
 
         # Check if the username already exists
         if [ -f "$userfile" ]; then
-            echo "Account already exists. Try logging in."
-            return 1  # Return to main menu if account exists
+            echo "Account already exists. Try logging in or choose another username."
+            return 1  # Return to main menu without exiting script
         fi
 
         # Prompt the user to set a password
@@ -46,16 +46,16 @@ function create_account() {
             continue
         fi
 
-        # Save the password to the user file
+        # Save the password into the user file
         echo "$pass" > "$userfile"
+
         echo "Account created successfully!"
 
-        # Store the username for session use
+        # Store the username in a variable for session use
         USERNAME="$username"
         return 0
     done
 }
-
 
 # Function to log in an existing user
 function login() {
@@ -80,31 +80,29 @@ function login() {
             continue
         fi
 
-        # Check password length
+        # Check if the password is at least 8 characters long
         if [ ${#pass} -lt 8 ]; then
             echo "Password must be at least 8 characters long."
             continue
         fi
 
-        # Check for at least one letter
+        # Check for at least one letter in the password
         if ! [[ "$pass" =~ [A-Za-z] ]]; then
             echo "Password must contain at least one letter."
             continue
         fi
 
-        # Check for at least one number
+        # Check for at least one number in the password
         if ! [[ "$pass" =~ [0-9] ]]; then
             echo "Password must contain at least one number."
             continue
         fi
 
-        break
+        # If all checks pass, log the user in
+        USERNAME="$username"
+        echo "Login successful. Welcome, $USERNAME!"
+        return 0
     done
-
-    # If all checks pass, log the user in
-    USERNAME="$username"
-    echo "Login successful. Welcome, $USERNAME!"
-    return 0
 }
 
 # ==============================================================================
@@ -373,25 +371,44 @@ done
 clear
 echo "Welcome to Smart Saving Jar System"
 
-#  Display login or account creation options to the user
-echo "1) Login"
-echo "2) Create Account"
+# Loop until the user successfully logs in, creates an account, or exits
+while true; do
+    # Display the login menu options
+    echo ""
+    echo "Thank you for using Smart Saving Jar. Keep saving!"
+    echo "1) Login"
+    echo "2) Create Account"
+    echo "3) Exit"
 
-# Read the user's choice (1 or 2)
-read -p "Choose: " choice
+    # Prompt the user to choose an option
+    read -p "Choose: " choice
 
-#  Execute the appropriate action based on user input
-case $choice in
-    1) 
-        # If 1 is selected → login and then show the main menu
-        login && main_menu
-        ;;
-    2)
-        # If 2 is selected → create a new account and then show the main menu
-        create_account && main_menu
-        ;;
-    *)
-        # If input is invalid → display exit message
-        echo "Invalid choice. Exiting..." 
-        ;;
-esac
+    case $choice in
+        1)
+            # If login is successful, go to the main menu
+            if login; then
+                main_menu
+                break
+            fi
+            # If login fails, the loop will continue
+            ;;
+        2)
+            # If account creation is successful, go to the main menu
+            if create_account; then
+                main_menu
+                break
+            fi
+            # If account creation fails, the loop will continue
+            ;;
+        3)
+            # Exit the program completely
+            echo "Exiting... Goodbye!"
+            exit 0
+            ;;
+        *)
+            # If the user enters an invalid option
+            echo "Invalid choice. Please try again."
+            ;;
+    esac
+done
+
