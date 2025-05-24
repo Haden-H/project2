@@ -174,10 +174,10 @@ incomplete_goals=()
 
 # List only goals that are not yet completed
 for file in "$GOALS_DIR/${USERNAME}"_*.txt; do
-    goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
-    IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT IMPORTANCE < "$file"
+goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
+IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$file"
 
-   if [ "$SAVED_AMOUNT" -lt "$GOAL_AMOUNT" ]; then
+        if [ "$SAVED_AMOUNT" -lt "$GOAL_AMOUNT" ]; then
             echo "- $goal (Target: $GOAL_AMOUNT, Saved: $SAVED_AMOUNT, Importance: $IMPORTANCE)"
             incomplete_goals+=("$goal")
         fi
@@ -185,17 +185,17 @@ done
 
 # If no incomplete goals exist, exit
 if [ ${#incomplete_goals[@]} -eq 0 ]; then
-    echo "All your goals are already completed! Nothing to update."
+        echo "All your goals are already completed! Nothing to update."
         return
 fi
 
 # Ask user for the goal name they want to update
 while true; do
-     read -p "Enter the goal name to update: " goal
+        read -p "Enter the goal name to update: " goal
         goal_file="$GOALS_DIR/${USERNAME}_$goal.txt"
 
         if [ -f "$goal_file" ]; then
-            IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT IMPORTANCE < "$goal_file"
+            IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$goal_file"
             if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
                 echo "This goal is already completed. Please choose another goal."
             else
@@ -205,25 +205,27 @@ while true; do
             echo "Goal not found. Please enter a valid goal name."
         fi
 done
+
 # Show current goal status
 echo "Goal: $goal"
-echo "Target: $GOAL_AMOUNT SAR | Saved: $SAVED_AMOUNT SAR | Importance: $IMPORTANCE"
+echo "Target: $GOAL_AMOUNT SAR | Saved: $SAVED_AMOUNT SAR | Last Saved: $LAST_DATE | Importance: $IMPORTANCE"
 
 # Ask user for the amount saved today and validate it's numeric
 while true; do
-  read -p "Enter the amount you saved today: " add
-  if [[ "$add" =~ ^[0-9]+$ ]]; then
-  break
-  else
-  echo "Please enter a valid number (digits only)."
-  fi
+        read -p "Enter the amount you saved today: " add
+        if [[ "$add" =~ ^[0-9]+$ ]]; then
+            break
+        else
+            echo "Please enter a valid number (digits only)."
+        fi
 done
 
 # Add the new saving to the current amount
 SAVED_AMOUNT=$((SAVED_AMOUNT + add))
+LAST_DATE=$(date +%F)
 
-# Save updated data back to the file (no date field at all)
-echo "$GOAL_AMOUNT;$SAVED_AMOUNT;$IMPORTANCE" > "$goal_file"
+# Save updated data back to the file
+echo "$GOAL_AMOUNT;$SAVED_AMOUNT;$LAST_DATE;$IMPORTANCE" > "$goal_file"
 
 # Calculate remaining amount
 remaining=$((GOAL_AMOUNT - SAVED_AMOUNT))
@@ -233,47 +235,47 @@ remaining=$((GOAL_AMOUNT - SAVED_AMOUNT))
 echo "Total saved: $SAVED_AMOUNT SAR"
 echo "Remaining to reach your goal: $remaining SAR"
 
-# Log this saving entry (no timestamp)
-echo "$add" >> "$LOGS_DIR/${USERNAME}_$goal.log"
+# Log this saving entry
+echo "$(date +%F), $add" >> "$LOGS_DIR/${USERNAME}_$goal.log"
 
 # Encouragement messages
 if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
-     echo "Congratulations! You have reached your goal [$goal]!"
+        echo "Congratulations! You have reached your goal [$goal]!"
 elif [ "$SAVED_AMOUNT" -ge $((GOAL_AMOUNT * 90 / 100)) ]; then
-     echo "You're very close to your goal [$goal]! Keep it up!"
+        echo "You're very close to your goal [$goal]! Keep it up!"
 fi
 }
 
 # Function to allow the user to edit a savings goal: name, target amount, or importance
 function edit_goal {
 echo "Your current active (incomplete) goals:"
-
 active_goals=()
-# Display only goals that are not yet completed
-for file in "$GOALS_DIR/${USERNAME}"_*.txt; do
-    goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
-    IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT IMPORTANCE < "$file"
 
-     if [ "$SAVED_AMOUNT" -lt "$GOAL_AMOUNT" ]; then
-     echo "- $goal (Target: $GOAL_AMOUNT, Saved: $SAVED_AMOUNT, Importance: $IMPORTANCE)"
-     active_goals+=("$goal")
-     fi
-    done
-# If no incomplete goals exist, exit
+# Display only incomplete goals
+for file in "$GOALS_DIR/${USERNAME}"_*.txt; do
+        goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
+        IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$file"
+
+        if [ "$SAVED_AMOUNT" -lt "$GOAL_AMOUNT" ]; then
+            echo "- $goal (Target: $GOAL_AMOUNT, Saved: $SAVED_AMOUNT, Importance: $IMPORTANCE)"
+            active_goals+=("$goal")
+        fi
+done
+
+# If no incomplete goals, return
 if [ ${#active_goals[@]} -eq 0 ]; then
-echo "All your goals are already completed. Nothing to edit."
-return
+        echo "All your goals are completed. Nothing to edit."
+        return
 fi
 
-# Loop until a valid goal name is provided
+# Loop until valid goal name provided
 while true; do
-read -p "Enter the goal name you want to edit: " goal
+        read -p "Enter the goal name you want to edit: " goal
         goal_file="$GOALS_DIR/${USERNAME}_$goal.txt"
-
         if [ -f "$goal_file" ]; then
-            IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT IMPORTANCE < "$goal_file"
+            IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$goal_file"
             if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
-                echo "This goal is already completed. Please choose another goal."
+                echo "This goal is already completed. Choose another one."
             else
                 break
             fi
@@ -291,7 +293,6 @@ read -p "Choose an option (1-3): " edit_opt
 
 case "$edit_opt" in
         1)
-            # Rename the goal file and log file
             read -p "Enter the new goal name: " new_name
             new_file="$GOALS_DIR/${USERNAME}_$new_name.txt"
             new_log="$LOGS_DIR/${USERNAME}_$new_name.log"
@@ -301,26 +302,22 @@ case "$edit_opt" in
             fi
             echo "Goal name updated to [$new_name]."
             ;;
-
         2)
-            # Update the target amount
             read -p "Enter the new target amount: " new_amount
-            echo "$new_amount;$SAVED_AMOUNT;$IMPORTANCE" > "$goal_file"
+            echo "$new_amount;$SAVED_AMOUNT;$LAST_DATE;$IMPORTANCE" > "$goal_file"
             echo "Target amount updated to $new_amount."
             ;;
-
         3)
-            # Update the importance level
             read -p "Enter the new importance (1 = Very High, 5 = Very Low): " new_importance
-            echo "$GOAL_AMOUNT;$SAVED_AMOUNT;$new_importance" > "$goal_file"
+            echo "$GOAL_AMOUNT;$SAVED_AMOUNT;$LAST_DATE;$new_importance" > "$goal_file"
             echo "Importance updated to [$new_importance]."
             ;;
-
         *)
             echo "Invalid choice. Please enter a number between 1 and 3."
             ;;
 esac
 }
+
 
 # Function to list user's goals sorted by importance
 # Importance levels: 1 = Highest priority, 5 = Lowest priority
@@ -404,8 +401,6 @@ echo "Suggested plan: Save $monthly_saving SAR/month to reach your goal of $goal
 function main_menu() {
 #starts an infinite loop the menu will keep showing untill the user chooses exit
 while true; do
-#calls a function (checks if the user has been inactive for a while and shows an alert
-  check_inactivity_alerts
 # echo statements to display the menu to the user
   echo "\n --- Main Menu ---"
   echo "1) Enter new saving goal"
