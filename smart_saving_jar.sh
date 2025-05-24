@@ -145,7 +145,7 @@ read -p "Enter the goal name to delete:" goal
 #delete the goal file and its corresponding log file
 rm -f "$GOALS_DIR/${USERNAME}_$goal.txt" "$LOGS_DIR/${USERNAME}_$goal.log"
 #check if the goal file exists
-if [ ! -f "$goal_file"]; then
+if [ ! -f "$goal_file" ]; then
   echo " Goal [$goal] not found"
   return
 fi
