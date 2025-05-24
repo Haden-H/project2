@@ -328,15 +328,15 @@ echo "Your goals sorted by importance (1 = Highest, 5 = Lowest):"
 for priority in 1 2 3 4 5; do
     for file in "$GOALS_DIR/${USERNAME}"_*.txt; do
         if [ -f "$file" ]; then
-            goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
-            IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$file"
+           goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
+           IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT LAST_DATE IMPORTANCE < "$file"
 
 # Show goal only if it matches current priority level
 if [ "$IMPORTANCE" -eq "$priority" ]; then
-   if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
-       status="Finished"
-    else
-       status="In Progress"
+     if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
+         status="Finished"
+   else
+         status="In Progress"
 fi
 echo "- $goal | Target: $GOAL_AMOUNT SAR, Saved: $SAVED_AMOUNT SAR | Importance: $IMPORTANCE | Status: $status"
 fi
