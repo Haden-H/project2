@@ -119,7 +119,7 @@ read -p "Enter target amount(SAR)" amount
 read -p "Enter importance (where 1 is very high and 5 is low):" importance
 #save a goal data to a format amount;save;date;importance
 #for a new goal,saved=0, and date is todays date
-echo "$amount;0;$(date+%F);$importance"> "$GOALS_DIR/${USERNAME}_$goal.txt"
+echo "$amount;0;$(date +%F);$importance" > "$GOALS_DIR/${USERNAME}_$goal.txt"
 #confirmation  messages
 echo "GOAL[$goal] with target $amount SAR created"
 }
@@ -133,18 +133,33 @@ goal=$(basename "$file" | sed "s/^${USERNAME}_//;s/.txt$//")
 #read the goal data from the file : amount;saved;date;importance
 IFS=';' read -r GOAL_AMOUNT SAVED_AMOUNT _IMPORTANCE < "$file"
 #determine the goal status based on saved amount
-status = "Not Finished"
-["$SAVED_AMOUNT" -ge "$GOAL_AMOUNT"] && status="Finished"
+status="Not Finished"
+if [ "$SAVED_AMOUNT" -ge "$GOAL_AMOUNT" ]; then
+   status="Finished"
+fi 
 # print the goal name with its status
 echo "-$goal [$status]"
 done
 # Ask the user which goal the wanna delete
 read -p "Enter the goal name to delete:" goal
 #delete the goal file and its corresponding log file
-rm -f "$GOALS_DIR/${USERNAME}_$goal.txt"
-"$LOGS_DIR/${USERNAME}_$goal.log"
-#confirmation message
-echo "Goal [$goal] deleted"
+rm -f "$GOALS_DIR/${USERNAME}_$goal.txt" "$LOGS_DIR/${USERNAME}_$goal.log"
+#check if the goal file exists
+if [ ! -f "$goal_file"]; then
+  echo " Goal [$goal] not found"
+  return
+fi
+# Ask confirmation
+read -p " Are you sure you want to delete the goal [$goal] ? (yes/no):" confirm
+case "$confirm" in
+  [Yy][Ee][Ss]|[Yy])
+   rm -f "$goal_file" "$log_file"
+   echo "Goal [$goal] deleted"
+   ;;
+  *)
+  echo "Deletion canceled"
+  ;;
+esac
 }
 
 # ==============================================================================
